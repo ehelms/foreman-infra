@@ -1,0 +1,63 @@
+- job:
+    name: 'test_katello_pull_request'
+    project-type: matrix
+    logrotate:
+      daysToKeep: -1
+      numToKeep: 32
+    properties:
+      - github_katello
+    concurrent: true
+    axes:
+      - axis:
+          type: label-expression
+          name: slave
+          values:
+            - fast
+    parameters:
+      - string:
+          name: branch
+          default: master
+          description: "Branch to run test suite on"
+      - pr_parameters
+      - string:
+          name: foreman_branch
+          default: develop
+          description: "Foreman branch to run test suite against"
+      - string:
+          name: foreman_pr_git_url
+          default:
+          description: 'GForeman it URL to PR to test, e.g. git://github.com/user/foo.git'
+      - string:
+          name: foreman_pr_git_ref
+          default:
+          description: 'Foreman Git ref for PR to test, usually the branch name'
+    scm:
+      - katello
+    builders:
+      - test_katello
+    publishers:
+      - archive:
+          artifacts: 'plugin/pkg/*'
+          only-if-success: false
+      - gemset_cleanup
+      - junit:
+          results: 'foreman/jenkins/reports/unit/*.xml'
+      - checkstyle:
+          pattern: 'plugin/rubocop.xml'
+      - cobertura:
+          report-file: 'plugin/engines/bastion_katello/coverage/**/cobertura-coverage.xml'
+          targets:
+            - files:
+                healthy: 10
+                unhealthy: 20
+                failing: 30
+            - method:
+                healthy: 50
+                unhealthy: 40
+                failing: 30
+      - trigger-parameterized-builds:
+          - project:
+              - 'pull_request_scanner'
+            predefined-parameters: |
+                project=katello
+                pr_number=${pr_number}

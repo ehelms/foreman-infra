@@ -1,0 +1,36 @@
+- job:
+    name: 'test_katello'
+    node: fast
+    logrotate:
+      daysToKeep: -1
+      numToKeep: 32
+    properties:
+      - github_katello
+    concurrent: true
+    parameters:
+      - string:
+          name: branch
+          default: master
+          description: "Branch to run test suite on"
+      - string:
+          name: foreman_branch
+          default: develop
+          description: "Foreman branch to run test suite against"
+    scm:
+      - katello
+    builders:
+      - clone_foreman
+      - test_katello
+    publishers:
+      - ircbot_freenode
+      - archive:
+          artifacts: 'plugin/pkg/*,Gemfile.lock'
+          only-if-success: false
+      - gemset_cleanup
+      - junit:
+          results: 'foreman/jenkins/reports/unit/*.xml'
+      - checkstyle:
+          pattern: 'plugin/rubocop.xml'
+      - trigger:
+          project: 'build_rpm_rubygem-katello_nightly'
+          threshold: SUCCESS
