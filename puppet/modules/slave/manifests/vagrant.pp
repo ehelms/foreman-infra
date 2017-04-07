@@ -4,11 +4,11 @@ class slave::vagrant($username, $api_key) {
 
   case $::osfamily {
     'RedHat': {
-      $vagrant_source = 'https://releases.hashicorp.com/vagrant/1.4.2/vagrant_1.4.2_x86_64.rpm'
+      $vagrant_source = 'https://releases.hashicorp.com/vagrant/1.9.3/vagrant_1.9.3_x86_64.rpm'
       $vagrant_provider = 'rpm'
     }
     'Debian': {
-      $vagrant_source = 'https://releases.hashicorp.com/vagrant/1.4.2/vagrant_1.4.2_x86_64.deb'
+      $vagrant_source = 'https://releases.hashicorp.com/vagrant/1.9.3/vagrant_1.9.3_x86_64.deb'
       $vagrant_provider = 'dpkg'
     }
     default: { fail("Unknown osfamily ${::osfamily}") }
