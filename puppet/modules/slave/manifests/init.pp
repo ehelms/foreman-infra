@@ -363,6 +363,8 @@ class slave (
         ensure => latest;
       'pyliblzma':
         ensure => latest;
+      'python-virtualenv':
+        ensure => latest;
     }
   }
   file { '/home/jenkins/.koji':
